@@ -90,21 +90,50 @@ class fdf_annotations:
         Method that returns the annotation value for the provided annotation id. Note that annotation value refers to the full object.
         If the provided object id value is not existing in the fdf_dict it will return None.
 
-        Input: object id
-        Return: string value containing the value of the annotation stored in the fdf_dict for the provided objectid key
+        Input: objectid (str): String value containing the object identifier for the annotation.
+        Return: string value containing the value of the annotation stored in the fdf_dict for the provided objectid key.
         """
 
-        if objectid in self.fdf_dict:     #do not add () after the dict or it will crash            
+        if objectid in self.fdf_dict:
             return self.fdf_dict[objectid]
         else: 
             return None
+
+    def __getitem__(self, objectid: str):
+        """
+        Method that calls the getannotation method.
+        """
+        return self.getannotation(self, objectid)
+    
+
+    def getcontent(self, objectid: str) -> str:
+        """
+        Method that returns the value of the /Content tag for the proivded annotation id (objectid).
+
+        Input: objectid (str): String value containing the object identifier for the annotation.
+        Return: string containing the value of the /Content attribute.
+            If the provided objectid does not exist, or the object doesn't have a /Content attribute the method will return None.
+        """
+
+        if objectid not in self.fdf_dict:
+            return None
+        if objectid in self.fdf_dict:
+            annotstring=self.fdf_dict[objectid]
+            contenttag=r"(?<!\\)/Content\(.*)\)"
+            contentmatch=re.search(contenttag, annotstring)
+            if contentmatch:
+                return contentmatch.group(1)               
+            else:
+                print(f"No /Content tag found in provided object {objectid}.")
+                return None
+
 
     def getrccontent(self, objectid) -> list:
         """
         Method that returns the annotation value for the provided annotation id split into a list of max 3 elements to allow for easily accessing and/or updating the xml/html part embedded in the /RC tag of the FDF object using other methods.
         If the provided object id value is not existing in the fdf_dict it will return None.
         
-        Input: object id
+        Input: objectid (str): String value containing the object identifier for the annotation.
         Return: list containing the value of the /RC tag as second element. 
             The first element of the returned list contains the content of the provided objectid prior to the /RC tag content.
             The third element of the returned list contains the content of the provided objectid after the /RC tag content.
@@ -138,7 +167,7 @@ class fdf_annotations:
         Method that returns the annotation value for the provided annotation id split into a list of max 3 elements to allow for easily accessing and updating the /DS tag of the FDF object using other methods.
         If the provided object id value is not existing in the fdf_dict it will return None.
         
-        Input: object id
+        Input: objectid (str): String value containing the object identifier for the annotation.
         Return: list containing the value of the /DS tag as second element. 
             The first element of the returned list contains the content of the provided objectid prior to the /DS tag content.
             The third element of the returned list contains the content of the provided objectid after the /DS tag content.
@@ -172,7 +201,7 @@ class fdf_annotations:
         Method that returns the annotation value for the provided annotation id split into a list of max 3 elements to allow for easily accessing and updating /DA tag of the FDF object using other methods.
         If the provided object id value is not existing in the fdf_dict it will return None.
         
-        Input: object id
+        Input: objectid (str): String value containing the object identifier for the annotation.
         Return: list containing the value of the /DA tag as second element. 
             The first element of the returned list contains the content of the provided objectid prior to the /DA tag content.
             The third element of the returned list contains the content of the provided objectid after the /DA tag content.
@@ -203,15 +232,15 @@ class fdf_annotations:
 
     
 
-    def updaterccontent(self, objectid, updatedrcstring) -> None:
+    def updaterccontent(self, objectid: str, updatedrcstring: str) -> None:
         """
         Method that updates the /RC value contained within the annotation ID.
         No update is performed if no /RC tag is contained within the annotation - note that the RC tag must have a proper opening and closing parenthesis to be qualified as present.
         Note: This method calls the addrcreturns method to split the provided updatedrcstring in chunks of 255 chars ending with a backslash followed by a new line
         
         Input: 
-            objectid=object id
-            updatedrcstring= updated string that will replace the /RC contents within the annotation object
+            objectid (str): String value containing the object identifier for the annotation.
+            updatedrcstring (str): updated string that will replace the /RC contents within the annotation object
         
         """
 
@@ -237,14 +266,14 @@ class fdf_annotations:
             else:
                 print(f"No /RC opening tag found in provided object {objectid}.")
                
-    def updatedscontent(self, objectid, updateddsstring) -> None:
+    def updatedscontent(self, objectid: str, updateddsstring: str) -> None:
         """
         Method that updates the /DS value contained within the annotation ID.
         No update is performed if no /DS tag is contained within the annotation - note that the DS tag must have a proper opening and closing parenthesis to be qualified as present.
           
         Input: 
-            objectid=object id
-            updateddsstring= updated string that will replace the /DS contents within the annotation object
+            objectid (str): String value containing the object identifier for the annotation.
+            updateddsstring (str): Updated string that will replace the /DS contents within the annotation object
         
         """
 
@@ -270,14 +299,14 @@ class fdf_annotations:
             else:
                 print(f"No /DS opening tag found in provided object {objectid}.")
 
-    def updatedacontent(self, objectid, updateddastring) -> None:
+    def updatedacontent(self, objectid: str, updateddastring: str) -> None:
         """
         Method that updates the /DA value contained within the annotation ID.
         No update is performed if no /DA tag is contained within the annotation - note that the DA tag must have a proper opening and closing parenthesis to be qualified as present.
           
         Input: 
-            objectid=object id
-            updateddastring= updated string that will replace the /DA contents within the annotation object
+            objectid (str): String value containing the object identifier for the annotation.
+            updateddastring (str): Updated string that will replace the /DA contents within the annotation object
         
         """
 
@@ -307,8 +336,7 @@ class fdf_annotations:
         """
         Method that returns the page number contained within the /Page attribute. Note this value is zero-based.
 
-        Input:
-            objectid=object id
+        Input: objectid (str): String value containing the object identifier for the annotation.            
         Return:
             int containing the page number
             In case the object has no page atribute, or the provided object could not be found it will return None.
@@ -346,8 +374,7 @@ class fdf_annotations:
         If the provided object id value is not existing in the fdf_dict it will return None.
         If the provided object id has no /Rect attribute it will return None.
         
-        Input: 
-            objectid: string: object id
+        Input: objectid (str): String value containing the object identifier for the annotation.  
         Return: String containing the Rect value enclosed in square brackets
         """
 
@@ -369,7 +396,7 @@ class fdf_annotations:
         If the provided object id has no /Rect attribute it will return None.
         
         Input: 
-            objectid: string: object id
+            objectid (str): String value containing the object identifier for the annotation.
             rectstring: string: value that will be assigned to the /Rect tag. Note: the provided value should be encapsulated within square brackets.
         Return: None
         """
@@ -395,8 +422,7 @@ class fdf_annotations:
         If the provided object id value is not existing in the fdf_dict it will return None.
         If the provided object id has no /C attribute it will return None.
         
-        Input: 
-            objectid: string: object id
+        Input: objectid (str): String value containing the object identifier for the annotation.
         Return: String containing the /C value enclosed in square brackets
         """
 
@@ -417,7 +443,7 @@ class fdf_annotations:
         If the provided object id has no /Rect attribute it will return None.
         
         Input: 
-            objectid: string: object id
+            objectid (str): String value containing the object identifier for the annotation.
             cstring: string: value that will be assigned to the /C tag. Note: the provided value should be encapsulated within square brackets.
         Return: None
         """
@@ -437,7 +463,13 @@ class fdf_annotations:
         return None
 
 
-    def removefromroot(self, objectid: str) -> None:        
+    def removefromroot(self, objectid: str) -> None:
+        """
+        Method that removes the provided objectid from the root_key list. I.e. It removes the reference from the catalog object, while not touching ordered_fdf_key list.
+
+        Input: objectid (str): Object identifier:  "\d+ \d+ obj" or "\d+ \d+ R".
+        Output: None
+        """ 
         objecttag2=r"^(\d+ \d+ )obj$"    #needed to reroute "\d+ \d+ obj" objects towards "\d+ \d+ R" values present in the key        
         objecttag2match=re.search(objecttag2, objectid)
         if objecttag2match:             #reroute spelling of object referenced
@@ -450,12 +482,12 @@ class fdf_annotations:
 
     def addtoroot(self, objectid: str, insertposition: int) -> None:         
         """
-        Method that adds a provided objectid to the root catalog object at the provided position within he list.
+        Method that adds a provided objectid to the root catalog object list (root_key) at the provided position within he list.
 
-        The method will only treat provided objectid values of the ofllowing format: "\d+ \d+ R" or "\d+ \d+ obj", E.g., "16 0 R" or "17 0 obj"
+        The method will only treat provided objectid values of the following format: "\d+ \d+ R" or "\d+ \d+ obj", E.g., "16 0 R" or "17 0 obj"
 
         Input Arguments:
-            objectid: (str) object identifier to be inserted into the root catalog object list  (root_key)
+            objectid (str): object identifier to be inserted into the root catalog object list  (root_key)
             insertposition: (int) indexposition where the provided objectid is to be inserted into the root catalog object list (root_key)
                 A value of -1 means that the object will be inserted in the last position in the root catalog object list (root_key)
         Return: None
@@ -485,7 +517,7 @@ class fdf_annotations:
         The method is actively excluding the border style subannotations referenced by parent annotations (i.e. object identifiers resolved in the bs_subobject_dict) within the newly created root_key.
         The method considers the 2nd element in the ordered_fdf_key list as the root catalog object itself.
         Header and trailer and any other object not identified by "\d+ \d+ obj formatting within the ordered_fdf_key are not considered by this method.
-        Note that this method does not update the rootvalue present in the fdf_dict. The latter is done during rexport of the object to fdf.
+        Note that this method does not update the rootvalue present in the fdf_dict. The latter is (to be) done during export of the object to fdf using method exportfdf.
 
         Input argument: None
         Return: None 
@@ -534,7 +566,7 @@ class fdf_annotations:
 
     def updatetrailer(self) -> None:
         """
-        Method that updates the trailer element in the fdf_dict and that ensures that trailer is present once as last itme in the ordered_fdf_key list.
+        Method that updates the trailer element in the fdf_dict, while also ensuring that trailer is present once as last item in the ordered_fdf_key list.
         The method ensures that the value of the reference inside the trailer object points to the object ID of the root catalog object.
         The method considers the 2nd element in the ordered_fdf_key list as the root catalog object itself.
         This method allows for properly (re-)exporting an updated fdf_annotations object to an fdf file.
@@ -569,20 +601,14 @@ class fdf_annotations:
                 print("No proper object catalog object ID found to allow for rebuilding trailer.")
                 self.fdf_dict["trailer"]=""     #seed with empty value to not make pgm crash upon export
 
-            
         
-        
-
-
-
-
     def exportfdf(self, outputfdfpath: str, rebuild_key: str ="N", rebuild_value: str ="Y", rebuild_trailer: str="Y") -> None:
         """
-        Method that exports the object to fdf file.
-        The optional arguments allow to rebuild the root_key, root_value and trailer of the fdf_dict object
+        Method that exports the object to an fdf file specified in outputfdfpath.
+        The oadditional arguments are optional to allow for rebuilding the root_key, root_value and trailer of the fdf_dict object.
         
         Inputs:
-            outputpath(str): output path of the target fdf file the object should be exported to 
+            outputfdfpath: (str) output path of the target fdf file the object should be exported to 
             rebuild_key = "Y"|"N": optional parameter to rebuild the root_catalog list internally - note this does not affect the output if rebuild_value is set to "N". Default is set to "N"
             rebuild_value="Y", "N": updates the fdf_dict value of the root catalog object according to the elements present in the root_key_list. Default is set to "Y"        
             rebuild_trailer ="Y", "N": updates the fdf_dict value of the trailer object to ensure alignment with the root catalog object ID and ensures it's included as the last item inside the ordered_fdf_key list. 
@@ -617,7 +643,7 @@ class fdf_annotations:
         if the annotation was referenced in the root catalog object - this reference is removed from root_key
         if the annotation to be removed points  to a subannotation within a subobject_dict this referenced sub annotation will also be explicitly removed (recursive deletion)
 
-        Input Argument: objectid
+        Input: objectid (str): String value containing the object identifier for the annotation.
         Return: None
         """
         objectid_R=""
@@ -673,7 +699,7 @@ class fdf_annotations:
         Not removing this will interfere with the analysis of the FDF content.
 
         Input: fdfrcxml: string (containing xml or html)
-        Output: string (containing xml or html, but without the (backslash +newline/carriage return) character sequences inside it)
+        Output: string (containing xml or html), but without the backslash + newline/carriage return character sequences inside it
         """
         
         if fdfrcxml=="":
@@ -683,12 +709,12 @@ class fdf_annotations:
     @staticmethod
     def addrcreturns(fdfxml: str) -> str:
         """
-        Method that adds a backslash followed by a new line and carriage return in the provided fdfxml string.
+        Method that adds a backslash followed by a new line character in the provided fdfxml string.
         This method ensures that all updated strings are again split into chunks of max 255 characters as observed in fdf extracts.
-        Not removing this will interfere with the analysis of the FDF content.
+        Not inserting this will interfere with the analysis of the FDF content.
 
         Input: fdfrcxml: string (containing xml or html)
-        Output: string (containing xml or html, but without the (backslash +newline/carriage return) character sequences inside it)
+        Output: string (containing xml or html), with the backslash +newline character sadded after each chunk of 255 chars
         """
         toprocess: str=fdfxml
         result: str=""
@@ -700,7 +726,7 @@ class fdf_annotations:
             else:
                 inbetweenlist.append(toprocess[0:255]) 
                 toprocess=toprocess[255:]
-        
+        print(inbetweenlist) 
         result="\\\n".join(inbetweenlist)
         return result
 
@@ -731,6 +757,31 @@ class fdf_annotations:
             else:
                 print(f"Provided inputstring does not contain expected keyvalueseparator within a pair. inputstring={inputstring}, pair={pair}, keyvalueseparator={keyvalueseparator}")
         return style_dict
+    
+    
+    @staticmethod
+    def dict_to_string(inputdict: dict, keyvalueseparator: str, pairseparator: str) -> str:
+        """
+        Method that converts the provided inputdict dictionary into a single string, separating the keyvalue pairs by using the provided keyvalueseparator, 
+        and separating the different entries in the inputdict by using the provided pairseparator.
+        
+        Input:
+        inputdictstring: dict: dictionary containing one or more entries
+        keyvalueseparator: str: character or set of characters present in the inputstring that separates each key  from its associated value. Typically this is a colon ':'.
+        pairseparator: str: character or set of characters present in the inputstring that separates between multiple key-value pairs. Typically this is a semicolon ';'.
+        
+        Output: String (str) containing all the dictionary entries provided in the inputdict concatenated into a single output string
+        
+        """
+        dictstring=""
+        if inputdict=={}:
+            return dictstring
+        for key, value in inputdict.items():           
+            if dictstring.strip() != "":
+                dictstring=dictstring+pairseparator
+            dictstring=dictstring+key+keyvalueseparator+value
+        
+        return dictstring
     
     
     @staticmethod
@@ -768,7 +819,7 @@ class fdf_annotations:
         """
         Method that extracts the values of all occurrences of the styles attribute included in the provided xml or html string."
         
-        This method assumes the embedded line splits in the xml have already been actively removed form the input fdfrcxml string by the removercreturns prior to feeding it into this method.
+        This method assumes the embedded line splits in the xml have already been actively removed from the input fdfrcxml string by applying the removercreturns after having obtained it via getrccontent, prior to feeding it into this method.
         Skipping this step will interfere with the analysis of the FDF content.
 
         Input: fdfrcxml: string (containing xml or html) that has already been processed by the removercreturns method
@@ -782,12 +833,12 @@ class fdf_annotations:
                     Otherwise it'll contain the xml/html content provided between previous style attribute value listed on previous outer list element and the current one listed in this emement of the outer list.
                 The second element contains the value of the style attribute as occurring inside the xml or html string provided.
                     In case no style attribute is remaining inside the input xml/html to be processed, then the value of the second element will be an empty string.                
-            In case the provided input fdfrcxml string provided is emptyn the method will return a list containing an empty inner list [[]]
+            In case the provided input fdfrcxml string provided is empty the method will return a list containing an empty inner list [[]]
         """
 
         if fdfrcxml=="":
             return [[]]
-        styletag=r"(\bstyle\w*=\w*\")([^\"]*?)\""
+        styletag=r"(\bstyle\s*=\s*\")([^\"]*?)\""
         toprocess=fdfrcxml  #string to decompose until fully processed (i.e. empty)
         outputlist=[]
         while toprocess !="":
@@ -801,11 +852,128 @@ class fdf_annotations:
                 toprocess=""        
         return outputlist
     
+    @staticmethod
+    def rcstyles_setmasterstyle(rcstyleslist: list, rcstylesdict: dict) -> list:
+        """
+        Method that takes the rcstyles list as input (obtained from method getrcstyles) and sets the style attribute dictionary of the first row (i.e. last element in first row) to  the dictionary provided rcstylesdict. 
+        It also converts the dictionary to a string to populate the second element of the first row accordingly.
+        This method is useful to set the standard font-size, text-align, color, font-weight, font-style, font-family, font-stretch within the rc prior to retranslating the rcstyleslist to the rcstring using method rcstyles_to_rccontentstring.
+        Note: it is recommended to not define bold font-weight in the master style, as this can be defined into a span afterwards. This allows to define a single master style for all text annotaiton objects.
+        Note: method dict_to_string is called from within this method.
+
+        Input: 
+            rcstyleslist (list): list obtained from method getrcstyles
+            rcstylesdict (dict): dictionary defining the default rc style for the /RC object (prior to applying any spans). 
+                It should define font-size, text-align, color, font-weight, font-style, font-family, font-stretch.
+        Output: a list that is identical to the rcstyleslist provided,  except for the third and second element from first row being updated to the provided dictionary in input and its associated string representation resepctively.                
+            In case the provided input fdfrcxml string provided is empty, or the dictionary on the first row is empty (i.e. no style tag existing) then this method will return the inputlist as such
+        """
+
+        if rcstyleslist==[]:
+            return rcstyleslist
+        if rcstyleslist[0][2]=={}:
+            return rcstyleslist
+        rcstyleslist[0][2]={key:value for key, value in rcstylesdict.items()}
+        rcstyleslist[0][1]=fdf_annotations.dict_to_string(rcstylesdict, ':', ';')
+        return rcstyleslist
+    
+    @staticmethod
+    def rc_dropspans(fdfrcxml: str) -> str:
+        """
+        Method that removes the span xml tags in the provided rc xml string.
+        Note that only the tags are removed. Any content between the opening span tag and closing span tag is preserved. 
+        This operation is typically required to ensure a single style policy to be applied on the entire annotation without touching the text to display.
+        
+        This method assumes the embedded line splits in the xml have already been actively removed from the input fdfrcxml string by the removercreturns prior to feeding it into this method.
+        Skipping this step will interfere with the analysis of the FDF content.
+
+        Input: fdfrcxml: string (containing xml) that has already been processed by the removercreturns method
+        Output: string no longer containing <span...> or </span> tags. 
+        """
+
+        toprocess="Y"
+        processed=fdfrcxml
+        spanopentag=r"(\<\s*?span\s+?.*?\>)"
+        spanclosetag=r"(\<\s*?/span\>)"
+        while toprocess=="Y":
+            toprocess="N"
+            spanopentagmatch=re.search(spanopentag, processed)
+            if spanopentagmatch:
+                processed=processed[0:spanopentagmatch.start(1)] + processed[spanopentagmatch.end(1):]
+                toprocess="Y"
+            spanclosetagmatch=re.search(spanclosetag, processed)
+            if spanclosetagmatch:
+                processed=processed[0:spanclosetagmatch.start(1)] + processed[spanclosetagmatch.end(1):]
+                toprocess="Y"
+        return processed
+    
+    @staticmethod
+    def rc_insertspan(fdfrcxml: str, openingspantag:str, closingspantag: str) -> str:
+        """
+        Method that inserts an opening span tag immediatelyly after the <p...> tag and a closing span tag immediately before the </p> tag within the provided fdfrcxml string.
+        This method assumes there's only one <p...> element included within the provided fdfrcxml string.
+        Note that only the tags are added. All content present in the input fdfrcxml string in between the opening and closing location will therefore become the value of the inserted span tag. 
+        This operation is typically required to insert a bold font-weight policy on top of the standard master style within the fdfrcxml,  i.e., after method getrccontent, removercreturns, rc_dropspans, getrcstyles, rcstyles_setmasterstyles have been invoked.
+
+        This method assumes the embedded line splits in the xml have already been actively removed from the input fdfrcxml string by the removercreturns prior to feeding it into this method.
+        Skipping this step will interfere with the analysis of the FDF content.
+
+        Input: 
+            fdfrcxml (str): String (containing xml) that has already been processed by the removercreturns method.
+            openingspantag (str): String that contains the opening span tag that is to be inserted. E.g., "<span style="font-weight:bold">".
+            closingspantag (str): String that contains the closing span tag that is to be inserted. E.g., "</span>". 
+        Output: string (str) with the provided opening and closing span tag embedded into it.
+            In case the provided fdfrcxmlstring does not contain both  <p...> and </p> tags the provided input fdfrcxml string is returned.
+            In case the closing tag would appear prior to the opening tag the provided input fdfrcxml string is returned.
+        """
+        
+        popentag=r"(\<\s*p\s+?.*?\>)"
+        pclosetag=r"(\</p\>)"
+        popentagmatch=re.search(popentag, fdfrcxml)
+        pclosetagmatch=re.search(pclosetag, fdfrcxml)
+        if popentagmatch and pclosetagmatch:
+            if popentagmatch.end(1) < pclosetagmatch.end(1):
+                prestring=fdfrcxml[:popentagmatch.end(1)]+openingspantag
+                midstring=fdfrcxml[popentagmatch.end(1):pclosetagmatch.start(1)]+closingspantag
+                endstring=fdfrcxml[pclosetagmatch.start(1):]
+                print(prestring)
+                print(midstring)
+                print(endstring)
+                return prestring+midstring+endstring
+            
+            else:
+                print(f'Input fdfrcxml string is compromised: The </p> closing tag appears prior to the <p ...> opening tag: {fdfrcxml}')
+                return fdfrcxml
+        else:
+            print(f'No <p ...> opening and </p> closing tag found in provided input fdfrcxml string: {fdfrcxml}')
+            return fdfrcxml
+
+    @staticmethod
+    def rcstyles_to_rccontentstring(rcstyleslist: list) -> str:
+        """
+        Method that takes an updated rcstyles list as input and translates it back to a rcstyles string that can be fed into updaterccontent afterwards
+        Input: 
+            rcstyleslist (list): list obtained from method getrcstyles, that has undergone modifications to update the rcstyles via e.g., rc_dropspans, rcstyles_setmasterstyle
+            
+        Output: (str): a /RC string that can be used as input in method updaterccontent to update the /RC attribute of the annotation accordingly
+        """
+
+        return_rc_string=""
+        if rcstyleslist==[]:
+            return return_rc_string
+        for row in rcstyleslist:
+            updatedrowstylestring=""
+            if row[1] !='':
+                updatedrowstylestring=fdf_annotations.dict_to_string(row[2], ':',';')
+            return_rc_string=return_rc_string+row[0]+updatedrowstylestring
+                   
+        return return_rc_string
+    
 
     @staticmethod
     def getdsattributes(fdfdsstr: str) -> list:
         """
-        Method that translates the provided DS contents string (fdfdsstr) into a dictionary.
+        Method that translates the provided DS contents string (fdfdsstr) into a list containing a dictionary.
                 
         Input: fdfdsstr: string contaning the /DS contents obtained using getdscontent method
         Output: List containing 3 elements
@@ -824,42 +992,114 @@ class fdf_annotations:
     
 
     @staticmethod
-    def rgb_inttohex(rgbcolorstring: str) -> str:
+    def rgb_inttohex(rgbintcolorstring: str) -> str:
         """
-        Method that translates the provided rgb colorstring integer values (0-255) to a hexadecimal color string value.
+        Method that translates the provided rgbintcolorstring integer values (0-255) to a hexadecimal color string value.
                 
-        Input: rgbcolorstr: string contaning the 3 int values (0-255) separated by a space. The string may be encapsulated with square brackets.
-        Output: hexadecimal string starting with a hashtag followed by the rgb components accordingly (no spacing, 2 hex chars per component)
+        Input: rgbintcolorstr: string containing the 3 int values (0-255), for red, green, blue resepctively, separated by a space. The string may be encapsulated with square brackets.
+        Output: string containing a hexadecimal rgb representation, consisting  of a hashtag followed by the rgb components represented in hexadecimal characters accordingly (no spacing, 2 hex chars per component for r, g, b)
              E.g. "0 0 255" or "[0 0 255]" --> "#0000FF"  
-             In case the provided rgbcolorstr does not meet the expected formatting or is empty, an empty string will be returned.
-
+             In case the provided rgbintcolorstring does not meet the expected formatting or is empty, an empty string will be returned.
         """
 
-        if rgbcolorstring=="":
+        if rgbintcolorstring=="":
             return ""
         intrgbtag=r"^\[?\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*\]?$"      #optional square brackets followed by optional space(s), each rgb component can max consist of 3 digits, separated by at least 1 space.
-        intrgbstrmatch=re.search(intrgbtag, rgbcolorstring)
+        intrgbstrmatch=re.search(intrgbtag, rgbintcolorstring)
         if intrgbstrmatch:
-            return "#" + format(int(intrgbstrmatch.group(1)), "02X") + format(int(intrgbstrmatch.group(2)), "02X") + format(int(intrgbstrmatch.group(3)), "02X")      #zero-padding to 2 digits for each rgb component 
+            return "#" + format(int(intrgbstrmatch.group(1)), "02X") + format(int(intrgbstrmatch.group(2)), "02X") + format(int(intrgbstrmatch.group(3)), "02X")      #zero-padding to 2 digits for each rgb component
+        return ""    #input does not match expected structure 
 
-@staticmethod
-    def rgb_floattoint(floatcolorstring: str) -> str:
+    @staticmethod
+    def rgb_hextoint(rgbhexcolorstring: str) -> str:
         """
-        Method that translates the provided rgb colorstring float values(0.0-1.0) to an integer colorstring separating the rgb components by a space.
+        Method that translates the provided rgbhexcolorstring to a string containing the 3 rgb values expressed as integer values (0-255) separated by a space.
                 
-        Input: rgbcolorstr: string contaning the 3 int values (0-255) separated by a space. The string may be encapsulated with square brackets.
-        Output: hexadecimal string starting with a hashtag followed by the rgb components accordingly (no spacing, 2 hex chars per component)
-             E.g. "0 0 255" or "[0 0 255]" --> "#0000FF"  
-             In case the provided rgbcolorstr does not meet the expected formatting or is empty, an empty string will be returned.
-
+        Input: rgbhexcolorstring: string consisting  of a hashtag followed by the rgb components represented in hexadecimal characters accordingly (no spacing, 2 hex chars per component for r, g, b; E.g., '#AA09F1')
+        Output: string containing the rgb components expressed as integer values (0-255) for the r, g, b components respectively, separated by a space.
+             E.g. "#0000FF" --> "0 0 255"  
+             In case the provided rgbhexcolorstring does not meet the expected formatting or is empty, an empty string will be returned.
         """
 
-        if rgbcolorstring=="":
+        if rgbhexcolorstring=="":
+            return ""
+        hexrgbtag=r"^#([0-9A-F]{2})([0-9A-F]{2})([0-9A-F]{2})$"      # hashtag followed by 6 hexadecimal chars
+        hexrgbstrmatch=re.search(hexrgbtag, rgbhexcolorstring)
+        if hexrgbstrmatch:
+            return str(int(hexrgbstrmatch.group(1), 16)) + " " + str(int(hexrgbstrmatch.group(2), 16)) + " " + str(int(hexrgbstrmatch.group(3), 16))
+        return ""    #input does not match expected structure     
+
+    @staticmethod
+    def rgb_fractoint(rgbfraccolorstring: str) -> str:
+        """
+        Method that translates the provided rgbfraccolorstring to a string containing the 3 rgb values expressed as integer values (0-255) separated by a space.
+                
+        Input: rgbfraccolorstring: string consisting  of a fraction of 1 representation of the  rgb values respectively, separated by a space, encapsulated between square brackets. (E.g., "[1.0 0.1234 0.0]")
+        Output: string containing the rgb components expressed as integer values (0-255) for the r, g, b components respectively, separated by a space.
+             E.g. "[1.0 0.123456 0.0]" --> "255 31 0"  
+             In case the provided rgbfraccolorstring does not meet the expected formatting or is empty, an empty string will be returned.
+        """
+
+        if rgbfraccolorstring=="":
+            return ""
+        fracrgbtag=r"^\[([01]\.\d{1,6})\s+([01]\.\d{1,6})\s+([01]\.\d{1,6})\]$"      # 0 or 1 followed by decimal separator (.) and followed by at least one and up to 6 decimals  for each component
+        fracrgbstrmatch=re.search(fracrgbtag, rgbfraccolorstring)
+        if fracrgbstrmatch:
+            return str(int(round(float(fracrgbstrmatch.group(1))*255))) + " " + str(int(round(float(fracrgbstrmatch.group(2))*255))) + " " + str(int(round(float(fracrgbstrmatch.group(3))*255)))
+        return ""    #input does not match expected structure
+    
+    
+    @staticmethod
+    def rgb_c_inttofrac(rgbintcolorstring: str) -> str:
+        """
+        Method that translates the provided rgbintcolorstring integer values (0-255) to a fractional (0.0-1.0) color string value.
+        the returned value can be embedded in the  /C tag as its preiciosn varies from minmally 1 to up to 6 decimals. Do not use this function to populate the /DA tag for the rg value as the latter uses different ranges of precision.
+                
+        Input: rgbintcolorstr: string containing the 3 int values (0-255), for red, green, blue resepctively, separated by a space. The string may be encapsulated with square brackets.
+        Output: string containing a fractional rgb representation, consisting  of float values for the r, g, b components respectively separated by a space, encapsulated in square brackets. Precision ranges between 1 decimal to up to 6 decimals.
+            E.g., "255 31 0" or "[255 31 0]" --> "[1.0 0.121569 0.0]"  
+            In case the provided rgbintcolorstring does not meet the expected formatting or is empty, an empty string will be returned.
+        """
+
+        if rgbintcolorstring=="":
             return ""
         intrgbtag=r"^\[?\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*\]?$"      #optional square brackets followed by optional space(s), each rgb component can max consist of 3 digits, separated by at least 1 space.
-        intrgbstrmatch=re.search(intrgbtag, rgbcolorstring)
+        intrgbstrmatch=re.search(intrgbtag, rgbintcolorstring)
         if intrgbstrmatch:
-            return "#" + format(int(intrgbstrmatch.group(1)), "02X") + format(int(intrgbstrmatch.group(2)), "02X") + format(int(intrgbstrmatch.group(3)), "02X")      #zero-padding to 2 digits for each rgb component 
+            r=("{:f}".format(int(intrgbstrmatch.group(1))/255)).rstrip("0") 
+            g=("{:f}".format(int(intrgbstrmatch.group(2))/255)).rstrip("0") 
+            b=("{:f}".format(int(intrgbstrmatch.group(3))/255)).rstrip("0")
+            if r[-1]==".":
+                r=r+"0"
+            if g[-1]==".":
+                g=g+"0"
+            if b[-1]==".":
+                b=b+"0"
+            return "[" +r + " " + g + " " + b +  "]"
+        return ""    #input does not match expected structure 
+    
+    @staticmethod
+    def rgb_da_inttofrac(rgbintcolorstring: str) -> str:
+        """
+        Method that translates the provided rgbintcolorstring integer values (0-255) to a fractional (0-1) color string value.
+        the returned value can be embedded in the  /C tag as its preiciosn varies from minmally 0 to up to 4 decimals. Do not use this function to populate the /C tag  as the latter uses different ranges of precision.
                 
-        
+        Input: rgbintcolorstr: string containing the 3 int values (0-255), for red, green, blue resepctively, separated by a space. The string may be encapsulated with square brackets.
+        Output: string containing a fractional rgb representation, consisting  of float values for the r, g, b components respectively separated by a space. Precision ranges between 0 to up to 4 decimals. 
+            Note it does not encapsulate the result in square brackets.
+            E.g., "255 31 0" or "[255 31 0]" --> "1 0.1216 0]"  
+            In case the provided rgbintcolorstring does not meet the expected formatting or is empty, an empty string will be returned.
+        """
+
+        if rgbintcolorstring=="":
+            return ""
+        intrgbtag=r"^\[?\s*(\d{1,3})\s+(\d{1,3})\s+(\d{1,3})\s*\]?$"      #optional square brackets followed by optional space(s), each rgb component can max consist of 3 digits, separated by at least 1 space.
+        intrgbstrmatch=re.search(intrgbtag, rgbintcolorstring)
+        if intrgbstrmatch:
+            r=("{:.4f}".format(int(intrgbstrmatch.group(1))/255)).rstrip("0").rstrip(".") 
+            g=("{:.4f}".format(int(intrgbstrmatch.group(2))/255)).rstrip("0").rstrip(".") 
+            b=("{:.4f}".format(int(intrgbstrmatch.group(3))/255)).rstrip("0").rstrip(".")            
+            return r + " " + g + " " + b
+        return ""    #input does not match expected structure 
+
 #additional methods to be added here
