@@ -65,7 +65,6 @@ for annot in annots:
             annots.updatedscontent(annot, boldds)   
         else:
             annots.updaterccontent(annot, rcstring)   #updating the actual /RC attrbibute here -- DO NOT FORGET
-            #Set bold /DA and /DS
             #Set non-bold /DA and /DS
             annots.updatedacontent(annot, nonboldda)
             annots.updatedscontent(annot, nonboldds)
