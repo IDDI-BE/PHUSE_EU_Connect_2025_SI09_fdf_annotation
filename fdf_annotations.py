@@ -472,7 +472,7 @@ class fdf_annotations:
         """
         Method that updates the /C value with the provided cstring value for the provided annotation id.
         If the provided object id value is not existing in the fdf_dict it will return None.
-        If the provided object id has no /Rect attribute it will return None.
+        If the provided object id has no /C attribute it will return None.
         
         Input: 
             objectid (str): String value containing the object identifier for the annotation.
@@ -1215,7 +1215,7 @@ class fdf_annotations:
     def rgb_da_inttofrac(rgbintcolorstring: str) -> str:
         """
         Method that translates the provided rgbintcolorstring integer values (0-255) to a fractional (0-1) color string value.
-        the returned value can be embedded in the /C tag as its precision varies from minimally 0 to up to 4 decimals. Do not use this function to populate the /C tag as the latter uses different ranges of precision.
+        the returned value can be embedded in the /DA tag as its precision varies from minimally 0 to up to 4 decimals. Do not use this function to populate the /C tag as the latter uses different ranges of precision.
                 
         Input: rgbintcolorstr: string containing the 3 int values (0-255), for red, green, blue respectively, separated by a space. The string may be encapsulated with square brackets.
         Output: string containing a fractional rgb representation, consisting of float values for the r, g, b components respectively separated by a space. Precision ranges between 0 to up to 4 decimals. 
