@@ -1167,7 +1167,7 @@ class fdf_annotations:
         """
         Method that translates the provided rgbfraccolorstring to a string containing the 3 rgb values expressed as integer values (0-255) separated by a space.
                 
-        Input: rgbfraccolorstring: string consisting of a fraction of 1 representation of the rgb values respectively, separated by a space, encapsulated between square brackets. (E.g., "[1.0 0.1234 0.0]")
+        Input: rgbfraccolorstring: string consisting of a fraction of 1 representation of the rgb values respectively, separated by a space, encapsulated between square brackets. (E.g., "[1.0 0.1234 0.0]" or "[1 0.1234 0]")
         Output: string containing the rgb components expressed as integer values (0-255) for the r, g, b components respectively, separated by a space.
              E.g. "[1.0 0.123456 0.0]" --> "255 31 0"  
              In case the provided rgbfraccolorstring does not meet the expected formatting or is empty, an empty string will be returned.
@@ -1175,10 +1175,10 @@ class fdf_annotations:
 
         if rgbfraccolorstring=="":
             return ""
-        fracrgbtag=r"^\[([01]\.\d{1,6})\s+([01]\.\d{1,6})\s+([01]\.\d{1,6})\]$"      # 0 or 1 followed by decimal separator (.) and followed by at least one and up to 6 decimals for each component
+        fracrgbtag=r"^\[([01](\.\d{1,6}){0,1})\s+([01](\.\d{1,6}){0,1})\s+([01](\.\d{1,6}){0,1})\]$"      # 0 or 1 followed by decimal separator (.) and followed by at least one and up to 6 decimals for each component
         fracrgbstrmatch=re.search(fracrgbtag, rgbfraccolorstring)
         if fracrgbstrmatch:
-            return str(int(round(float(fracrgbstrmatch.group(1))*255))) + " " + str(int(round(float(fracrgbstrmatch.group(2))*255))) + " " + str(int(round(float(fracrgbstrmatch.group(3))*255)))
+            return str(int(round(float(fracrgbstrmatch.group(1))*255))) + " " + str(int(round(float(fracrgbstrmatch.group(3))*255))) + " " + str(int(round(float(fracrgbstrmatch.group(5))*255)))
         return ""    #input does not match expected structure
     
     
