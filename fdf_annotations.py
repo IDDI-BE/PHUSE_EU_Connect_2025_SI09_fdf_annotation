@@ -165,7 +165,7 @@ class fdf_annotations:
             return None
 
 
-    def getrccontent(self, objectid) -> list:
+    def getrccontent(self, objectid) -> str:
         """
         Method that returns the annotation value for the provided annotation id.
         If the provided object id value is not existing in the fdf_dict it will return None.
