@@ -461,7 +461,7 @@ class fdf_annotations:
         if objectid not in self.fdf_dict:
             print(f"The provided object (ID= {objectid}) could not be found within the fdf.")      
             return None       
-        ctag=r"(?<!\\)/C(\[.*\])"
+        ctag=r"(?<!\\)/C(\[.*?\])"
         cmatch=re.search(ctag, self.fdf_dict[objectid])
         if cmatch:                        
             return str(cmatch.group(1)) 
