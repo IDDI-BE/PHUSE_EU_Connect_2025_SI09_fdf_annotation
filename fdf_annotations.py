@@ -39,7 +39,8 @@ class fdf_annotations:
         Method to load an FDF file into the fdf_annotations class. The FDF file is assumed to be obtained by exporting comments from an existing SDTM acrf.pdf in Adobe Reader 2025.x.y.
 
         Input: inputfdfpath (str): string containing the path to an fdf file that is to be loaded.
-        Output: fdf_annotations object containing the provided FDF file contents.         
+        Output: fdf_annotations object containing the provided FDF file contents.
+        Return: None.         
         """
 
         #load input fdf        
@@ -144,8 +145,8 @@ class fdf_annotations:
         Method that returns the value of the /Contents tag for the provided annotation id (objectid).
 
         Input: objectid (str): String value containing the object identifier for the annotation.
-        Return: string containing the value of the /Contents attribute.
-            If the provided objectid does not exist, or the object doesn't have a /Contents attribute the method will return None.
+        Return: (str) String containing the value of the /Contents attribute.
+                None is returned in case the provided objectid is not included in fdf_dict, or if the /Contents tag is not properly opened or closed.
         """
 
         if objectid not in self.fdf_dict:
@@ -167,7 +168,7 @@ class fdf_annotations:
 
     def getrccontent(self, objectid) -> str:
         """
-        Method that returns the annotation value for the provided annotation id.
+        Method that returns the /RC attribute value for the provided annotation id.
         If the provided object id value is not existing in the fdf_dict it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
@@ -194,85 +195,76 @@ class fdf_annotations:
                 print(f"No /RC opening tag found in provided object {objectid}.")
                 return None
 
-    def getdscontent(self, objectid) -> list:
+    def getdscontent(self, objectid) -> str:
         """
-        Method that returns the annotation value for the provided annotation id split into a list of max 3 elements to allow for easily accessing and updating the /DS tag of the FDF object using other methods.
+        Method that returns the /DS attibute value for the provided annotation id.
         If the provided object id value is not existing in the fdf_dict it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
-        Return: list containing the value of the /DS tag as second element. 
-            The first element of the returned list contains the content of the provided objectid prior to the /DS tag content.
-            The third element of the returned list contains the content of the provided objectid after the /DS tag content.
+        Return: (str) String containing the value of the /DS tag as second element. 
+                None is returned in case the provided objectid is not included in fdf_dict, or if the /DS tag is not properly opened or closed.          
         """
 
         if objectid not in self.fdf_dict:
             return None
-        if objectid in self.fdf_dict:
-            dslist=[]
+        if objectid in self.fdf_dict:            
             annotstring=self.fdf_dict[objectid]
             dsstarttag=r"(?<!\\)/DS\("
             dsstartmatch=re.search(dsstarttag, annotstring)
             if dsstartmatch:                
-                dslist.append(annotstring[0:dsstartmatch.end()])
                 toprocess=annotstring[dsstartmatch.end():]
                 dsendtag=r"(?<!\\)\)"
                 dsendmatch=re.search(dsendtag, toprocess)
                 if dsendmatch:
-                    dslist.append(toprocess[0:dsendmatch.start()])
-                    dslist.append(toprocess[dsendmatch.start():])
+                    return toprocess[0:dsendmatch.start()]
                 else:
                     print(f"No /DS closing parenthesis found for provided object {objectid}.")
-                    dslist.append(toprocess)
-                return dslist
+                    return None
             else:
                 print(f"No /DS opening tag found in provided object {objectid}.")
-                return [self.fdf_dict[objectid]]        #no DS tag found
+                return None
     
-    def getdacontent(self, objectid) -> list:
+    def getdacontent(self, objectid) -> str:
         """
-        Method that returns the annotation value for the provided annotation id split into a list of max 3 elements to allow for easily accessing and updating /DA tag of the FDF object using other methods.
+        Method that returns the /DA attibute value for the provided annotation id.
         If the provided object id value is not existing in the fdf_dict it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
-        Return: list containing the value of the /DA tag as second element. 
-            The first element of the returned list contains the content of the provided objectid prior to the /DA tag content.
-            The third element of the returned list contains the content of the provided objectid after the /DA tag content.
+        Return: (str) String containing the value of the /DA tag as second element. 
+                None is returned in case the provided objectid is not included in fdf_dict, or if the /DA tag is not properly opened or closed.        
         """
 
         if objectid not in self.fdf_dict:
             return None
         if objectid in self.fdf_dict:
-            dalist=[]
             annotstring=self.fdf_dict[objectid]
             dastarttag=r"(?<!\\)/DA\("
             dastartmatch=re.search(dastarttag, annotstring)
             if dastartmatch:                
-                dalist.append(annotstring[0:dastartmatch.end()])
                 toprocess=annotstring[dastartmatch.end():]
                 daendtag=r"(?<!\\)\)"
                 daendmatch=re.search(daendtag, toprocess)
                 if daendmatch:
-                    dalist.append(toprocess[0:daendmatch.start()])
-                    dalist.append(toprocess[daendmatch.start():])
+                    return toprocess[0:daendmatch.start()]                    
                 else:
                     print(f"No /DA closing parenthesis found for provided object {objectid}.")
-                    dalist.append(toprocess)
-                return dalist
+                    return None
             else:
                 print(f"No /DA opening tag found in provided object {objectid}.")
-                return [self.fdf_dict[objectid]]        #no DA tag found
+                return None
 
     
 
     def updaterccontent(self, objectid: str, updatedrcstring: str) -> None:
         """
-        Method that updates the /RC value contained within the annotation ID.
+        Method that updates the /RC attribute value contained within the annotation ID.
         No update is performed if no /RC tag is contained within the annotation - note that the RC tag must have a proper opening and closing parenthesis to be qualified as present.
-        Note: This method calls the addrcreturns method to split the provided updatedrcstring in chunks of 255 chars ending with a backslash followed by a new line
+        Note: This method calls the addrcreturns method to split the provided updatedrcstring in chunks of 255 chars ending with a backslash followed by a new line.
         
         Input: 
             objectid (str): String value containing the object identifier for the annotation.
-            updatedrcstring (str): updated string that will replace the /RC contents within the annotation object
+            updatedrcstring (str): updated string that will replace the /RC contents within the annotation object.
+        Return: None.
         
         """
 
@@ -300,13 +292,14 @@ class fdf_annotations:
                
     def updatedscontent(self, objectid: str, updateddsstring: str) -> None:
         """
-        Method that updates the /DS value contained within the annotation ID.
+        Method that updates the /DS attribute value contained within the annotation ID.
         No update is performed if no /DS tag is contained within the annotation - note that the DS tag must have a proper opening and closing parenthesis to be qualified as present.
           
         Input: 
             objectid (str): String value containing the object identifier for the annotation.
-            updateddsstring (str): Updated string that will replace the /DS contents within the annotation object
-        
+            updateddsstring (str): Updated string that will replace the /DS contents within the annotation object.
+        Return: None. 
+
         """
 
         
@@ -333,12 +326,13 @@ class fdf_annotations:
 
     def updatedacontent(self, objectid: str, updateddastring: str) -> None:
         """
-        Method that updates the /DA value contained within the annotation ID.
+        Method that updates the /DA attribute value contained within the annotation ID.
         No update is performed if no /DA tag is contained within the annotation - note that the DA tag must have a proper opening and closing parenthesis to be qualified as present.
           
         Input: 
             objectid (str): String value containing the object identifier for the annotation.
             updateddastring (str): Updated string that will replace the /DA contents within the annotation object
+        Return: None.
         
         """
 
@@ -370,8 +364,8 @@ class fdf_annotations:
 
         Input: objectid (str): String value containing the object identifier for the annotation.            
         Return:
-            int containing the page number
-            In case the object has no page attribute, or the provided object could not be found it will return None.
+            int containing the page number.
+            None is returned in case the provided objectid is not included in fdf_dict, or if the /Page tag is not existing.   
         
         """    
         if objectid in self.fdf_dict:
@@ -386,6 +380,14 @@ class fdf_annotations:
     
         
     def setpagenum(self, objectid: str, pagenum: int) -> None:
+        """
+        Method that sets the page number contained within the /Page attribute. Note this value is zero-based.
+
+        Input: 
+            objectid (str): String value containing the object identifier for the annotation.
+            pagenum (int): integer value containing the zero-based page number to be set for the provided objectid.            
+        Return: None.        
+        """    
         if objectid in self.fdf_dict:
             pagetag=r"/Page (\d+)(?=/)"
             pagematch=re.search(pagetag, self.fdf_dict[objectid])            
@@ -402,18 +404,19 @@ class fdf_annotations:
     
     def getrect(self, objectid: str) -> str:
         """
-        Method that returns the /Rect value as a string for the provided annotation id.
+        Method that returns the /Rect attribute value as a string for the provided annotation id.
         If the provided object id value is not existing in the fdf_dict it will return None.
         If the provided object id has no /Rect attribute it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.  
-        Return: String containing the /Rect value enclosed in square brackets
+        Return: (str) String containing the /Rect value enclosed in square brackets.
+                None is returned in case the provided objectid is not included in fdf_dict, or if the /Rect tag is not existing.
         """
 
         if objectid not in self.fdf_dict:
             print(f"The provided object (ID= {objectid}) could not be found within the fdf.")      
             return None       
-        recttag=r"(?<!\\)/Rect(\[.*\])"
+        recttag=r"(?<!\\)/Rect(\[.*?\])"
         rectmatch=re.search(recttag, self.fdf_dict[objectid])
         if rectmatch:                        
             return str(rectmatch.group(1)) 
@@ -430,13 +433,13 @@ class fdf_annotations:
         Input: 
             objectid (str): String value containing the object identifier for the annotation.
             rectstring: string: value that will be assigned to the /Rect tag. Note: the provided value should be encapsulated within square brackets.
-        Return: None
+        Return: None.
         """
 
         if objectid not in self.fdf_dict:
             print(f"The provided object (ID= {objectid}) could not be found within the fdf.")      
             return None       
-        recttag=r"(?<!\\)/Rect(\[.*\])"         
+        recttag=r"(?<!\\)/Rect(\[.*?\])"         
         rectmatch=re.search(recttag, self.fdf_dict[objectid])
         if rectmatch:
             pretagtext=self.fdf_dict[objectid][0:rectmatch.span()[0]]
@@ -455,7 +458,8 @@ class fdf_annotations:
         If the provided object id has no /C attribute it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
-        Return: String containing the /C value enclosed in square brackets
+        Return: (str) String containing the /C value enclosed in square brackets.
+                None is returned in case the provided objectid is not included in fdf_dict, or if the /C tag is not existing.
         """
 
         if objectid not in self.fdf_dict:
@@ -476,7 +480,7 @@ class fdf_annotations:
         
         Input: 
             objectid (str): String value containing the object identifier for the annotation.
-            cstring: string: value that will be assigned to the /C tag. Note: the provided value should be encapsulated within square brackets.
+            cstring (str): String value that will be assigned to the /C tag. Note: the provided value should be encapsulated within square brackets.
         Return: None
         """
 
@@ -500,7 +504,7 @@ class fdf_annotations:
         Method that removes the provided objectid from the root_key list. I.e. It removes the reference from the catalog object, while not touching ordered_fdf_key list.
 
         Input: objectid (str): Object identifier:  "\d+ \d+ obj" or "\d+ \d+ R".
-        Output: None
+        Output: None.
         """ 
         objecttag2=r"^(\d+ \d+ )obj$"    #needed to reroute "\d+ \d+ obj" objects towards "\d+ \d+ R" values present in the key        
         objecttag2match=re.search(objecttag2, objectid)
@@ -519,10 +523,10 @@ class fdf_annotations:
         The method will only treat provided objectid values of the following format: "\d+ \d+ R" or "\d+ \d+ obj", E.g., "16 0 R" or "17 0 obj"
 
         Input Arguments:
-            objectid (str): object identifier to be inserted into the root catalog object list  (root_key)
-            insertposition: (int) indexposition where the provided objectid is to be inserted into the root catalog object list (root_key)
-                A value of -1 means that the object will be inserted in the last position in the root catalog object list (root_key)
-        Return: None
+            objectid (str): Object identifier to be inserted into the root catalog object list  (root_key).
+            insertposition (int): Index position where the provided objectid is to be inserted into the root catalog object list (root_key).
+                A value of -1 means that the object will be inserted in the last position in the root catalog object list (root_key).
+        Return: None.
         
         """
         
@@ -551,8 +555,8 @@ class fdf_annotations:
         Header and trailer and any other object not identified by "\d+ \d+ obj formatting within the ordered_fdf_key are not considered by this method.
         Note that this method does not update the rootvalue present in the fdf_dict. The latter is (to be) done during export of the object to fdf using method exportfdf.
 
-        Input argument: None
-        Return: None 
+        Input argument: None.
+        Return: None.
         """
         
         self.root_key.clear()
@@ -1234,5 +1238,81 @@ class fdf_annotations:
             b=("{:.4f}".format(int(intrgbstrmatch.group(3))/255)).rstrip("0").rstrip(".")            
             return r + " " + g + " " + b
         return ""    #input does not match expected structure 
+
+    @staticmethod
+    def rc_html_to_xml (rchtmlstring: str, bodystring: str) -> str:
+        """
+        Method that replaces html /RC contents to associated xml /RC contents to allow for harmonization:
+        It replaces the <html:body ...>  opening tag to a provided <body ...> element.
+        It removes html: from opening <html:...> and closing </html:...> tags.
+        It adds the xml header at the beginning of the string (only if <html:body ...> tag is discovered).
+
+        Note: Method removercreturns should have been executed on the input rchtmlstring prior to calling this method to avoid interference of the newlines/carriage appearing in the /RC values. 
+        Note: This method calls method rc_hashtml to verify whether the provided string contains html tags or not. 
+
+        Input:
+            rchtmlstring (str): String obtained using getrcontent, that contains html iso xml.
+            bodystring (str): String containing the xml equivalent of the html opening body tag that is to be replaced.
+        Output:
+            String containing the html tags replaced by xml.
+            In case no html tags are detected, the provided rchtmlstring is returned as such.
+
+        """
+        toreturn=rchtmlstring
+        if fdf_annotations.rc_hashtml(toreturn)==False:
+            return toreturn
+        #replace htmlbody opening tag by harcdoded xml body tag
+        htmlbodytag=r"<html:body .*?>"
+        htmlbodytagmatch=re.search(htmlbodytag, toreturn)
+        if htmlbodytagmatch:            
+            #replace body tag with xml body tag
+            toreturn=toreturn[0:htmlbodytagmatch.start()]+bodystring+toreturn[htmlbodytagmatch.end():]
+            #insert xml header
+            toreturn='<?xml version="1.0"?>'+toreturn
+        else:
+            print("No html body tag replaced in provided rchtmlstring.")
+        #remove html: from <html: ...> tags
+        htmltag=r"<html:"
+        toprocess=True
+        while toprocess:
+            htmltagmatch=re.search(htmltag, toreturn)
+            if htmltagmatch:
+                toreturn=toreturn[0:htmltagmatch.start()]+"<"+toreturn[htmltagmatch.end():]
+            else:
+                toprocess=False
+        #remove html: from </html: ...> tags
+        htmlclosetag=r"<\/html:"
+        toprocess=True
+        while toprocess:
+            htmlclosetagmatch=re.search(htmlclosetag, toreturn)
+            if htmlclosetagmatch:
+                toreturn=toreturn[0:htmlclosetagmatch.start()]+"</"+toreturn[htmlclosetagmatch.end():]
+            else:
+                toprocess=False
+        return toreturn
+
+    @staticmethod
+    def rc_hashtml(rchtmlstring: str) -> bool:
+        """
+        Method that returns True if the provided rchtmlstring does contain html tags. 
+        The rchtmlstring is assumed to be obtained using method getrccontent, and should be processed using method removercreturns prior to feeding it into this method to avoid interference.
+
+        Input:
+            rchtmlstring (str): String obtained using getrcontent, that contains html iso xml.
+        Output:
+            bool: 
+            True is returned if the provided rchtmlstring contains <html:...> or </html:> tags.
+            False is returned otherwise.
+        """
+
+        htmltag=r"</?html:"
+        htmltagmatch=re.search(htmltag, rchtmlstring)
+        if htmltagmatch:            
+            return True
+        return False
+         
+
+
+
 
 #additional methods to be added here
