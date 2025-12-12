@@ -3,6 +3,8 @@ import io
 
 class fdf_annotations:
     """
+
+    
     Class that facilitates FDF import, manipulation and export of annotations.
     The intended use is for CDISC SDTM annotations that need to be made compliant with CDISC SDTM-MSG V2.0 guidelines.
     This class is the underlying code developed for the paper and presentation of PHUSE EU Connect 2025 SI09 "Add More MSG to Your Annotations" (19NOV2025) in Hamburg.
@@ -97,15 +99,15 @@ class fdf_annotations:
             print(f"No referenced annotation blocks found within the inventory root object within the privded fdf file {inputfdfpath}.")
             
         #populate subobject_dicts i.e. objects referenced from a parent object (excluding the inventory root object)
-        referencetag="(/BS|/Popup|/Parent|/[^/]+) (\d+ \d+ R)"
-        for item in self.ordered_fdf_key[2:]:         #activiely excluding header and catalog object   
+        referencetag=r"(?<!\\)(/BS|/Popup|/Parent|/[^/]+?) (\d+ \d+ R)"
+        for item in self.ordered_fdf_key[2:]:         #actively excluding header and catalog object   
             annotcontent=self.fdf_dict[item]            
-            referencematch=re.search(referencetag, annotcontent)            
+            referencematch=re.search(referencetag, annotcontent)        
             if referencematch and item !="trailer":      #actively excluding trailer object
                 if referencematch.group(1)=="/BS":
                     self.bs_subobject_dict[item]=referencematch.group(2)
                 elif referencematch.group(1)=="/Popup":
-                    self.parent_subobject_dict[item]=referencematch.group(2)
+                    self.popup_subobject_dict[item]=referencematch.group(2)
                 elif referencematch.group(1)=="/Parent":
                     self.parent_subobject_dict[item]=referencematch.group(2)
                 else:
@@ -357,6 +359,7 @@ class fdf_annotations:
                 
             else:
                 print(f"No /DA opening tag found in provided object {objectid}.")
+
    
     def getpagenum(self, objectid: str) -> int:
         """
@@ -497,7 +500,54 @@ class fdf_annotations:
             return None                   
         print(f"The provided object (ID= {objectid}) has no /C attribute.") 
         return None
+    
+    def getca(self, objectid:str) -> str:
+        """
+        Method that returns the /CA value as a string for the provided annotation id. 
+        This value represents the opacity within an annotation object. In case of no opacity the tag is generally absent.
+        If the provided object id value is not existing in the fdf_dict it will return None.
+        If the provided object id has no /CA attribute it will return None.
+        
+        Input: objectid (str): String value containing the object identifier for the annotation.
+        Return: (str) String containing the /CA value.
+                None is returned in case the provided objectid is not included in fdf_dict, or if the /CA tag is not existing.
+        """
+        if objectid not in self.fdf_dict:
+            print(f"The provided object (ID= {objectid}) could not be found within the fdf.")      
+            return None       
+        catag=r"(?<!\\)/CA\s+([0-9.]+)\s*/"
+        camatch=re.search(catag, self.fdf_dict[objectid])
+        if camatch:                        
+            return str(camatch.group(1)) 
+        print(f"The provided object (ID= {objectid}) has no /CA attribute.") 
+        return None
+    
+    def dropca(self, objectid:str) -> None:
+        """
+        Method that removes the /CA tag and value from the annotation for the provided annotation id. 
+        This value represents the opacity within an annotation object. In case of no opacity the tag is generally absent.
+        If the provided object id value is not existing in the fdf_dict it will return None.
+        If the provided object id has no /CA attribute it will return None.
+        
+        Input: objectid (str): String value containing the object identifier for the annotation.
+        Return: None
+        """
 
+        if objectid not in self.fdf_dict:
+            print(f"The provided object (ID= {objectid}) could not be found within the fdf.")      
+            return None       
+        catag=r"(?<!\\)(/CA\s+[0-9.]+\s*)/"
+        camatch=re.search(catag, self.fdf_dict[objectid])
+        if camatch: 
+            print(self.fdf_dict[objectid])
+            pretagtext=self.fdf_dict[objectid][0:camatch.span()[0]]
+            posttagtext=self.fdf_dict[objectid][camatch.span(1)[1]:]
+            self.fdf_dict[objectid]=pretagtext+posttagtext  
+            print(self.fdf_dict[objectid])                     
+            
+            return None
+        print(f"The provided object (ID= {objectid}) has no /CA attribute.") 
+        return None
 
     def removefromroot(self, objectid: str) -> None:
         """
@@ -830,6 +880,29 @@ class fdf_annotations:
         else:
             print(f"The provided object (ID= {objectid}) was not part of the fdf_dict.")
             return False 
+        
+    def hasca(self, objectid: str) -> bool:
+        """
+        Method that returns True if the provided objectid has a /CA attribute. The /CA attribute 
+        It returns False if the provided objectid doesn't contain such /CA attribute.
+        
+        Input: objectid (str): String value containing the object identifier for the annotation.
+        Output: bool: True is returned if the /CA attribute exists.
+                      False is returned if the /CA attribute does not exist, or the provided objectid is not included in the fdf_dict.
+        """
+        
+        objecttag2=r"^(\d+ \d+ )R$"    #needed to reroute "\d+ \d+ R" objects towards "\d+ \d+ obj" values present in fdf_dict       
+        objecttag2match=re.search(objecttag2, objectid)
+        if objecttag2match:             #reroute spelling of object referenced
+            objectid=objecttag2match.group(1)+"obj"
+        if objectid in self.fdf_dict:
+            annotstring=self.fdf_dict[objectid]
+            catag=r"(?<!\\)/CA\s*"
+            catagmatch=re.search(catag, annotstring)
+            return True if catagmatch else False
+        else:
+            print(f"The provided object (ID= {objectid}) was not part of the fdf_dict.")
+            return False
             
     @staticmethod
     def removercreturns(fdfrcxml: str) -> str:
