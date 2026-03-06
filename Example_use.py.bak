@@ -80,7 +80,7 @@ for page, value in color_dict.items():
 
 #change backgroundcolor in annotations using color_dict populated above
 for annot in annots:
-    if annots.hascontent(annot):
+    if annots.hasc(annot):
         page=annots.getpagenum(annot)
         keycolor=annots.rgb_fractoint(annots.getc(annot))
         updatedcolor=annots.rgb_c_inttofrac(color_dict[page][keycolor])
