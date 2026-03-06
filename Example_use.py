@@ -16,7 +16,7 @@ inputfdfpath=r"C:\Users\dbaele\Downloads\CRF playground\DUMMY_aCRF_PHUSE_EU_CONN
 #Please provide the filepath where the updated fdf is to be saved
 outputfdfpath=r"C:\Users\dbaele\Downloads\CRF playground\DUMMY_aCRF_PHUSE_EU_CONNECT_2025_formatted.fdf"
 
-###########################################""
+###########################################
 # Standards
 # backgroundcoloroder defines the background color to be used within a single page
 # standardrcstyle: fontsize 12, non-bold, Arial  (Used on both domain header nnotations and variable annotations)
@@ -24,10 +24,11 @@ outputfdfpath=r"C:\Users\dbaele\Downloads\CRF playground\DUMMY_aCRF_PHUSE_EU_CON
 # rccloseboldspan: closing tag associated with rcopenboldspan
 # nonboldds, boldds: default /DS string for non-bold vs bold annotations
 # nonboldda, boldda: default /DA string for non-bold vs bold annotations
-###########################################""
+###########################################
 
-backgroundcolororder=['191 255 255', '255 255 150', '150 255 150', '255 190 155',     #only first 4 colors defined in SDTM-MSG MSG V2.0
-                    '0 146 146', '182 109 255', '219 109 0', '255 109 182', '0 109 219', '36 255 36', '255 182 219', '109 182 255'] #extra color order defined when needed
+#only first 4 colors defined in SDTM-MSG MSG V2.0
+#extra color order defined when needed
+backgroundcolororder=['191 255 255', '255 255 150', '150 255 150', '255 190 155', '0 146 146', '182 109 255', '219 109 0', '255 109 182', '0 109 219', '36 255 36', '255 182 219', '109 182 255']
 standardrcstyle={'font-size':'12.0pt', 'text-align':'left', 'color':'#000000', 'font-weight': 'normal', 'font-style': 'normal', 'font-family':'Arial', 'font-stretch':'normal'}
 rcopenboldspan='<span style="font-weight:bold">'
 rccloseboldspan='</span>'

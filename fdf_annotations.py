@@ -81,11 +81,11 @@ class fdf_annotations:
 
         #populate root_key list with referenced annotations object IDs:  (inventory object = 2nd item in ordered_fdf_key)
         inventoryobjtext=self.fdf_dict[self.ordered_fdf_key[1]]
-        inventorytag="/Annots\[((\d+ \d+ R )*(\d+ \d+ R))\]"
+        inventorytag=r"/Annots\[((\d+ \d+ R )*(\d+ \d+ R))\]"
         inventorymatch=re.search(inventorytag, inventoryobjtext)
         if inventorymatch:
             inventory_toprocess=inventorymatch.group(1)
-            individualreftag="\d+ \d+ R"
+            individualreftag=r"\d+ \d+ R"
             while inventory_toprocess:                
                 individualrefmatch=re.search(individualreftag, inventory_toprocess)
                 if individualrefmatch:
@@ -203,7 +203,7 @@ class fdf_annotations:
         If the provided object id value is not existing in the fdf_dict it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
-        Return: (str) String containing the value of the /DS tag as second element. 
+        Return: (str) String containing the value of the /DS tag. 
                 None is returned in case the provided objectid is not included in fdf_dict, or if the /DS tag is not properly opened or closed.          
         """
 
@@ -232,7 +232,7 @@ class fdf_annotations:
         If the provided object id value is not existing in the fdf_dict it will return None.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
-        Return: (str) String containing the value of the /DA tag as second element. 
+        Return: (str) String containing the value of the /DA tag. 
                 None is returned in case the provided objectid is not included in fdf_dict, or if the /DA tag is not properly opened or closed.        
         """
 
@@ -539,18 +539,15 @@ class fdf_annotations:
         catag=r"(?<!\\)(/CA\s+[0-9.]+\s*)/"
         camatch=re.search(catag, self.fdf_dict[objectid])
         if camatch: 
-            print(self.fdf_dict[objectid])
             pretagtext=self.fdf_dict[objectid][0:camatch.span()[0]]
             posttagtext=self.fdf_dict[objectid][camatch.span(1)[1]:]
-            self.fdf_dict[objectid]=pretagtext+posttagtext  
-            print(self.fdf_dict[objectid])                     
-            
+            self.fdf_dict[objectid]=pretagtext+posttagtext           
             return None
         print(f"The provided object (ID= {objectid}) has no /CA attribute.") 
         return None
 
     def removefromroot(self, objectid: str) -> None:
-        """
+        r"""
         Method that removes the provided objectid from the root_key list. I.e. It removes the reference from the catalog object, while not touching ordered_fdf_key list.
 
         Input: objectid (str): Object identifier:  "\d+ \d+ obj" or "\d+ \d+ R".
@@ -567,7 +564,7 @@ class fdf_annotations:
 
 
     def addtoroot(self, objectid: str, insertposition: int) -> None:         
-        """
+        r"""
         Method that adds a provided objectid to the root catalog object list (root_key) at the provided position within he list.
 
         The method will only treat provided objectid values of the following format: "\d+ \d+ R" or "\d+ \d+ obj", E.g., "16 0 R" or "17 0 obj"
@@ -598,7 +595,7 @@ class fdf_annotations:
 
 
     def rebuildrootkey(self) -> None:
-        """
+        r"""
         Method that rebuilds the root catalog object root_key by considering all objects present in the ordered_fdf_key list that are of the form "\d+ \d+ obj".
         The method is actively excluding the border style subannotations referenced by parent annotations (i.e. object identifiers resolved in the bs_subobject_dict) within the newly created root_key.
         The method considers the 2nd element in the ordered_fdf_key list as the root catalog object itself.
@@ -637,7 +634,7 @@ class fdf_annotations:
         newcatalogref=" ".join(self.root_key)    #transform root_key to single line string value with space as separator
 
 
-        inventorytag="/Annots\[((\d+ \d+ R )*(\d+ \d+ R))\]"
+        inventorytag=r"/Annots\[((\d+ \d+ R )*(\d+ \d+ R))\]"
         inventorymatch=re.search(inventorytag, oldrootvalue)
         if inventorymatch:
             precatalogref=oldrootvalue[0:inventorymatch.span()[0]+8]            
@@ -678,7 +675,7 @@ class fdf_annotations:
                 if trailermatch.group(1)+"obj"==self.ordered_fdf_key[1]:
                     recreate_trailer="N"
         if recreate_trailer=="Y":
-            catalogtag="^(\d+ \d+ )(R|obj)"
+            catalogtag=r"^(\d+ \d+ )(R|obj)"
             catalogmatch=re.search(catalogtag, self.ordered_fdf_key[1])
             if catalogmatch:
                 catalog_object_ref=catalogmatch.group(1)+"R"
@@ -883,7 +880,7 @@ class fdf_annotations:
         
     def hasca(self, objectid: str) -> bool:
         """
-        Method that returns True if the provided objectid has a /CA attribute. The /CA attribute 
+        Method that returns True if the provided objectid has a /CA attribute. The /CA attribute represents the opacity of the object. 
         It returns False if the provided objectid doesn't contain such /CA attribute.
         
         Input: objectid (str): String value containing the object identifier for the annotation.
@@ -1371,7 +1368,7 @@ class fdf_annotations:
         The rchtmlstring is assumed to be obtained using method getrccontent, and should be processed using method removercreturns prior to feeding it into this method to avoid interference.
 
         Input:
-            rchtmlstring (str): String obtained using getrcontent, that contains html iso xml.
+            rchtmlstring (str): String obtained using getrccontent, that contains html iso xml.
         Output:
             bool: 
             True is returned if the provided rchtmlstring contains <html:...> or </html:> tags.
